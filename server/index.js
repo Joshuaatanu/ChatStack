@@ -12,7 +12,22 @@ import {
 } from 'url';
 import authRoutes from './routes/auth.js'
 import userRoutes from './routes/users.js'
-import {register} from "./controllers/auth.js"
+import postRoutes from './routes/post.js'
+import {
+    register
+} from "./controllers/auth.js"
+import {
+    createPost
+} from "./controllers/post.js"
+import {
+    verifyToken
+} from './middleware/auth.js';
+import User from './models/User.js';
+import Post from './models/Post.js';
+import {
+    users,
+    posts
+} from './data/index.js'
 
 /* CONFIGURATIONS */
 const __filename = fileURLToPath(
@@ -53,9 +68,11 @@ const upload = multer({
 
 /** ROUTES WITH FILES */
 app.post('/auth/register', upload.single("picture"), register)
+app.post("/posts", verifyToken, upload.single("picture"), createPost)
 /**ROUTES */
 app.use('/auth', authRoutes)
-app.use("/users",userRoutes)
+app.use("/users", userRoutes)
+app.use("/posts", postRoutes)
 
 /*MONGOOE SETUP */
 mongoose.set('strictQuery', true);
@@ -65,5 +82,20 @@ mongoose.connect(process.env.MONGO_URL, {
         useUnifiedTopology: true,
     }).then(() => {
         app.listen(PORT, () => console.log(`SERVER CONNECTED AT : ${PORT}`));
+
+        // User.insertMany(users, (err) => {
+        //     if (err) {
+        //         console.log(err);
+        //     } else {
+        //         console.log("successfully added users");
+        //     }
+        // });
+        // Post.insertMany(posts, (err) => {
+        //     if (err) {
+        //         console.log(err);
+        //     } else {
+        //         console.log("successfully added posts");
+        //     }
+        // });
     })
     .catch((error) => console.log(`${error} DID NOT CONNECT`));
